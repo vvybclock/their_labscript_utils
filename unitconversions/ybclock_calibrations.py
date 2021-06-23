@@ -1,5 +1,9 @@
 '''
 Calibrations.py for Ybclock lab.
+
+
+After these calibration classes are defined, one needs to instantiate them in the
+`connection_table.py`, for their particular channel.
 '''
 
 #####################################################################
@@ -62,4 +66,37 @@ class GreenFrequencyVCOCalibration(UnitConversion):
 		MHz = self.interpolation_VtoHz(volts)
 		return MHz
 
+
+class TwoPhotonDetuning_Cooling(UnitConversion):
+	"""docstring for TwoPhotonDetuning_Cooling. Sigma plus detuning to adjust
+	frequency detuning using Green Transition. Not sure what is
+	controlling, maybe the EOM? Check later"""
+			
+	# This must be defined outside of init, and must match the default hardware unit specified within the BLACS tab
+	base_unit = 'V'
+	
+	# You can pass a dictionary at class instantiation with some parameters to use in your unit converstion.
+	# You can also place a list of "order of magnitude" prefixes (eg, k, m, M, u, p) you also want available
+	# and the UnitConversion class will automatically generate the conversion function based on the functions 
+	# you specify for the "derived units". This list should be stored in the 'magnitudes' key of the parameters
+	# dictionary
+	
+	def __init__(self, calibration_parameters = None):
+		#absorb dictionary
+		self.parameters = calibration_parameters
+		if calibration_parameters == None:
+			self.parameters = {}
+
+		self.derived_units = ['Hz']
+
+		UnitConversion.__init__(self, self.parameters)
+		
+
+	def Hz_to_base(self,Hz):
+		volts = (Hz/1e6 -170.764 + 170.84)*1000/35.04
+		return volts
+
+	def Hz_from_base(self,volts):
+		Hz = (170.764 + volts*35.04/1000 -170.84)*1e6
+		return Hz
 
